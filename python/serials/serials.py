@@ -45,14 +45,14 @@ class Serials(object):
 		self.bs_esc = False
 		self.overflow = False
 		self.rxing = False
-		self.rxbuf = ""
+		self.rxbuf = bytearray()
 		self.rxpkt = Packet()
 
 	def reset(self):
 		self.rxpkt_ready = False
 		self.bs_esc = False
 		self.rxing = False
-		self.rxbuf = ""
+		self.rxbuf = bytearray()
 
 	def rxpkt(self):
 		return self.rxpkt
@@ -84,7 +84,7 @@ class Serials(object):
 				self.bs_esc = True
 				continue
 			if b == Serials.BS_BEGIN and (self.bs_esc is False):
-				self.rxbuf = ""
+				self.rxbuf = bytearray()
 				self.rxpkt_ready = False
 				self.rxing = True
 				continue
@@ -106,7 +106,11 @@ class Serials(object):
 		self._tx(b)
 
 	def _send_data(self, b):
-		if b == Serials.BS_BEGIN or b == Serials.BS_END or b == Serials.BS_ESC:
+		t = type(b)
+		if t == str:
+			b = ord(b)
+		#print("--- %s %02X" % (typestr,b))
+		if (b == Serials.BS_BEGIN) or (b == Serials.BS_END) or (b == Serials.BS_ESC):
 			self._send_byte(Serials.BS_ESC)
 		self._send_byte(b)
 
